@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  image-rendering:pixelated;
+}
+
+#love-root{
+  font-family:'Press Start 2P',monospace;
+  background:#1a0010;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:14px 8px 20px;
+  position:relative;
+  overflow:hidden;
+  min-height:560px;
+}
+
+#love-root::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(255,150,180,0.04) 0px,
+    rgba(255,150,180,0.04) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events:none;
+  z-index:0;
+}
+
+h2.sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+}
+
+#hud{
+  display:flex;
+  gap:16px;
+  font-size:6px;
+  margin-bottom:8px;
+  z-index:2;
+  position:relative;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.hl{color:#f9a8d4;}
+.hv{color:#fde68a;}
+
+#cv-wrap{
+  border:3px solid #e879a0;
+  box-shadow:0 0 0 3px #831843,0 0 28px #e879a088;
+  position:relative;
+  z-index:2;
+}
+
+canvas{
+  display:block;
+}
+
+#msg{
+  font-size:6px;
+  color:#fbcfe8;
+  margin-top:8px;
+  text-align:center;
+  line-height:2;
+  z-index:2;
+  position:relative;
+  min-height:26px;
+}
+
+#btns{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+  z-index:2;
+  position:relative;
+}
+
+button.lb{
+  font-family:'Press Start 2P',monospace;
+  font-size:6px;
+  padding:6px 10px;
+  background:#2d0020;
+  color:#f9a8d4;
+  border:2px solid #e879a0;
+  cursor:pointer;
+}
+
+button.lb:hover{
+  background:#4c0030;
+  color:#fde68a;
+  border-color:#fde68a;
+}
+
+#reward-screen{
+  display:none;
+  position:relative;
+  z-index:10;
+  background:#1a0010;
+  border:3px solid #e879a0;
+  box-shadow:0 0 0 3px #831843,0 0 40px #e879a0aa;
+  padding:24px 20px;
+  text-align:center;
+  max-width:340px;
+  margin-top:8px;
+}
+
+#reward-screen.show{
+  display:block;
+}
+
+#reward-title{
+  font-size:9px;
+  color:#fde68a;
+  margin-bottom:14px;
+  line-height:2;
+}
+
+#reward-msg{
+  font-size:6px;
+  color:#fbcfe8;
+  line-height:2.4;
+  margin-bottom:16px;
+}
+
+#heart-art{
+  margin:12px auto;
+  width:80px;
+  height:70px;
+}
+
+#confetti-wrap{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:60px;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+.conf{
+  position:absolute;
+  top:-8px;
+  font-size:10px;
+  animation:fall 1.2s linear infinite;
+}
+
+@keyframes fall{
+  to{
+    top:60px;
+    opacity:0;
+  }
+}
