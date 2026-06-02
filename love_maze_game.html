@@ -1,0 +1,339 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;image-rendering:pixelated;}
+#love-root{
+  font-family:'Press Start 2P',monospace;
+  background:#1a0010;
+  display:flex;flex-direction:column;align-items:center;
+  padding:14px 8px 20px;
+  position:relative;overflow:hidden;
+  min-height:560px;
+}
+#love-root::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,rgba(255,150,180,0.04) 0px,rgba(255,150,180,0.04) 1px,transparent 1px,transparent 4px);
+  pointer-events:none;z-index:0;
+}
+h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+#hud{display:flex;gap:16px;font-size:6px;margin-bottom:8px;z-index:2;position:relative;flex-wrap:wrap;justify-content:center;}
+.hl{color:#f9a8d4;}.hv{color:#fde68a;}
+#cv-wrap{border:3px solid #e879a0;box-shadow:0 0 0 3px #831843,0 0 28px #e879a088;position:relative;z-index:2;}
+canvas{display:block;}
+#msg{font-size:6px;color:#fbcfe8;margin-top:8px;text-align:center;line-height:2;z-index:2;position:relative;min-height:26px;}
+#btns{display:flex;gap:8px;margin-top:8px;z-index:2;position:relative;}
+button.lb{
+  font-family:'Press Start 2P',monospace;font-size:6px;
+  padding:6px 10px;background:#2d0020;color:#f9a8d4;
+  border:2px solid #e879a0;cursor:pointer;
+}
+button.lb:hover{background:#4c0030;color:#fde68a;border-color:#fde68a;}
+
+#reward-screen{
+  display:none;
+  position:relative;z-index:10;
+  background:#1a0010;
+  border:3px solid #e879a0;
+  box-shadow:0 0 0 3px #831843,0 0 40px #e879a0aa;
+  padding:24px 20px;
+  text-align:center;
+  max-width:340px;
+  margin-top:8px;
+}
+#reward-screen.show{display:block;}
+#reward-title{font-size:9px;color:#fde68a;margin-bottom:14px;line-height:2;}
+#reward-msg{font-size:6px;color:#fbcfe8;line-height:2.4;margin-bottom:16px;}
+#heart-art{margin:12px auto;width:80px;height:70px;}
+#confetti-wrap{position:absolute;top:0;left:0;right:0;height:60px;overflow:hidden;pointer-events:none;}
+.conf{position:absolute;top:-8px;font-size:10px;animation:fall 1.2s linear infinite;}
+@keyframes fall{to{top:60px;opacity:0;}}
+</style>
+
+<div id="love-root">
+  <h2 class="sr-only">Love-themed pixel art maze game. Navigate the heart character through the maze using arrow keys to reach the gift reward at the end.</h2>
+
+  <div id="hud">
+    <span class="hl">LEVEL</span><span class="hv" id="hl">1</span>
+    <span class="hl">STEPS</span><span class="hv" id="hs">0</span>
+    <span class="hl">HEARTS</span><span class="hv" id="hh">♥♥♥</span>
+    <span class="hl">SCORE</span><span class="hv" id="hsc">0</span>
+  </div>
+
+  <div id="cv-wrap"><canvas id="gc" width="336" height="336"></canvas></div>
+  <div id="msg">USE ARROW KEYS TO MOVE<br>FIND YOUR WAY TO THE GIFT! ♥</div>
+  <div id="btns">
+    <button class="lb" onclick="startGame()">♥ NEW GAME</button>
+    <button class="lb" onclick="skipLevel()">SKIP ♥</button>
+  </div>
+
+  <div id="reward-screen">
+    <div id="confetti-wrap"></div>
+    <div id="reward-title">YOU FOUND LOVE! ♥</div>
+    <svg id="heart-art" viewBox="0 0 80 70" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="hglow">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path d="M40 60 C10 40 4 20 16 12 C24 6 34 10 40 18 C46 10 56 6 64 12 C76 20 70 40 40 60Z" fill="#e879a0" filter="url(#hglow)"/>
+      <path d="M40 54 C16 36 10 20 20 14 C26 10 34 14 40 22 C46 14 54 10 60 14 C70 20 64 36 40 54Z" fill="#f9a8d4"/>
+      <path d="M28 22 C26 18 30 15 34 20" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
+      <text x="40" y="36" text-anchor="middle" font-size="14" fill="#fff" font-family="'Press Start 2P',monospace">♥</text>
+      <circle cx="16" cy="8" r="3" fill="#fde68a" opacity="0.9"/>
+      <circle cx="64" cy="8" r="2" fill="#fde68a" opacity="0.7"/>
+      <circle cx="8" cy="30" r="2" fill="#f9a8d4" opacity="0.8"/>
+      <circle cx="72" cy="30" r="2" fill="#f9a8d4" opacity="0.8"/>
+    </svg>
+    <div id="reward-msg"></div>
+    <button class="lb" onclick="nextLevelFromReward()">NEXT LEVEL ♥</button>
+  </div>
+</div>
+
+<script>
+const COLS=21,ROWS=21,CELL=16;
+const C=document.getElementById('gc');
+const ctx=C.getContext('2d');
+
+const msgs=[
+  "Every step you take\nis a step closer\nto love. ♥",
+  "Love is patient,\nlove is kind,\nand you made it! ♥",
+  "Through every twist\nand turn, love\nfound a way! ♥",
+  "You navigated\nthe maze of\nthe heart! ♥",
+  "True love conquers\nall mazes! ♥♥♥"
+];
+
+const P={
+  bg:'#1a0010',
+  wall:['#2d0020','#3d0030','#4a0038'],
+  wallTop:'#e879a0',
+  floor:'#120008',
+  floorAlt:'#180010',
+  player:'#fde68a',
+  pBody:'#f9a8d4',
+  exit:'#fde68a',
+  rose:'#e879a0',
+  roseDark:'#831843',
+  petal:'#fbcfe8',
+  sparkle:'#fff',
+};
+
+let maze,player,exitPos,level,steps,lives,score,gameOver,won;
+let tick=0,blink=0;
+
+function genMaze(){
+  const g=Array.from({length:ROWS},()=>Array(COLS).fill(1));
+  const stack=[{r:1,c:1}];
+  g[1][1]=0;
+  const dirs=[{r:-2,c:0},{r:2,c:0},{r:0,c:-2},{r:0,c:2}];
+  while(stack.length){
+    const cur=stack[stack.length-1];
+    const sh=dirs.map(d=>({...d,o:Math.random()})).sort((a,b)=>a.o-b.o);
+    let mv=false;
+    for(const d of sh){
+      const nr=cur.r+d.r,nc=cur.c+d.c;
+      if(nr>0&&nr<ROWS-1&&nc>0&&nc<COLS-1&&g[nr][nc]===1){
+        g[cur.r+d.r/2][cur.c+d.c/2]=0;
+        g[nr][nc]=0;
+        stack.push({r:nr,c:nc});
+        mv=true;break;
+      }
+    }
+    if(!mv)stack.pop();
+  }
+  return g;
+}
+
+function getPaths(g){
+  const p=[];
+  for(let r=1;r<ROWS-1;r++)for(let c=1;c<COLS-1;c++)if(g[r][c]===0)p.push({r,c});
+  return p;
+}
+function dist(a,b){return Math.abs(a.r-b.r)+Math.abs(a.c-b.c);}
+
+function startGame(){
+  document.getElementById('reward-screen').classList.remove('show');
+  level=1;steps=0;lives=3;score=0;gameOver=false;won=false;
+  initLevel();
+}
+
+function initLevel(){
+  document.getElementById('reward-screen').classList.remove('show');
+  maze=genMaze();
+  const paths=getPaths(maze);
+  player={r:1,c:1};
+  exitPos=paths.reduce((b,p)=>dist(p,player)>dist(b,player)?p:b,paths[0]);
+  won=false;gameOver=false;
+  setMsg('LEVEL '+level+' — FIND THE GIFT! ♥');
+  updateHUD();
+  if(window._raf)cancelAnimationFrame(window._raf);
+  loop();
+}
+
+function skipLevel(){level++;initLevel();}
+function nextLevelFromReward(){level++;initLevel();}
+
+function updateHUD(){
+  document.getElementById('hl').textContent=level;
+  document.getElementById('hs').textContent=steps;
+  document.getElementById('hh').textContent='♥'.repeat(Math.max(0,lives));
+  document.getElementById('hsc').textContent=score;
+}
+function setMsg(t){document.getElementById('msg').innerHTML=t.replace(/\n/g,'<br>');}
+
+function canMove(r,c){return r>=0&&r<ROWS&&c>=0&&c<COLS&&maze[r][c]===0;}
+
+function move(dr,dc){
+  if(gameOver||won)return;
+  const nr=player.r+dr,nc=player.c+dc;
+  if(!canMove(nr,nc))return;
+  player.r=nr;player.c=nc;
+  steps++;
+  updateHUD();
+  if(player.r===exitPos.r&&player.c===exitPos.c){
+    won=true;
+    score+=1000+Math.max(0,500-steps)*level;
+    updateHUD();
+    setTimeout(showReward,400);
+  }
+}
+
+function showReward(){
+  const rs=document.getElementById('reward-screen');
+  rs.classList.add('show');
+  document.getElementById('reward-title').textContent='LEVEL '+level+' COMPLETE! ♥';
+  document.getElementById('reward-msg').innerHTML=msgs[Math.min(level-1,msgs.length-1)].replace(/\n/g,'<br>');
+  spawnConfetti();
+}
+
+function spawnConfetti(){
+  const w=document.getElementById('confetti-wrap');
+  w.innerHTML='';
+  const items=['♥','★','✿','♡','·'];
+  for(let i=0;i<18;i++){
+    const s=document.createElement('span');
+    s.className='conf';
+    s.textContent=items[i%items.length];
+    s.style.left=Math.random()*100+'%';
+    s.style.animationDelay=Math.random()*1.2+'s';
+    s.style.color=['#e879a0','#fde68a','#fbcfe8','#f9a8d4','#fff'][i%5];
+    w.appendChild(s);
+  }
+}
+
+const roses=[];
+function placeRoses(){
+  roses.length=0;
+  for(let r=1;r<ROWS-1;r+=3)for(let c=1;c<COLS-1;c+=3){
+    if(maze[r][c]===1&&r+1<ROWS&&maze[r+1]&&maze[r+1][c]===0)roses.push({r,c});
+  }
+}
+
+let rosesPlaced=false;
+
+function drawCell(r,c){
+  const x=c*CELL,y=r*CELL;
+  if(maze[r][c]===1){
+    ctx.fillStyle=P.wall[Math.abs(r*5+c*7)%3];
+    ctx.fillRect(x,y,CELL,CELL);
+    ctx.fillStyle=P.wallTop;
+    ctx.fillRect(x,y,CELL,2);
+    ctx.fillStyle='rgba(255,150,180,0.06)';
+    ctx.fillRect(x+1,y+2,CELL-2,CELL-3);
+  } else {
+    ctx.fillStyle=(r+c)%2===0?P.floor:P.floorAlt;
+    ctx.fillRect(x,y,CELL,CELL);
+    if((r*3+c*7)%11===0){
+      ctx.fillStyle='rgba(232,121,160,0.15)';
+      ctx.fillRect(x+6,y+6,4,4);
+    }
+  }
+}
+
+function drawRose(r,c){
+  const x=c*CELL+8,y=r*CELL+11;
+  ctx.fillStyle='#4a1830';
+  ctx.fillRect(x-1,y-2,2,6);
+  ctx.fillStyle=P.rose;
+  ctx.fillRect(x-3,y-7,6,5);
+  ctx.fillStyle=P.petal;
+  ctx.fillRect(x-2,y-8,4,3);
+  ctx.fillStyle=P.roseDark;
+  ctx.fillRect(x-1,y-6,2,2);
+}
+
+function drawExit(){
+  const x=exitPos.c*CELL,y=exitPos.r*CELL;
+  const b=Math.floor(blink/6)%3;
+  const cols=['#e879a0','#f9a8d4','#fde68a'];
+  ctx.fillStyle=cols[b]+'44';
+  ctx.fillRect(x-1,y-1,CELL+2,CELL+2);
+  ctx.fillStyle=cols[b];
+  ctx.font="bold 11px 'Press Start 2P',monospace";
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('♥',x+8,y+8);
+}
+
+function drawPlayer(){
+  const x=player.c*CELL,y=player.r*CELL;
+  ctx.fillStyle='#831843';
+  ctx.fillRect(x+3,y+12,10,3);
+  ctx.fillStyle=P.pBody;
+  ctx.fillRect(x+4,y+8,8,7);
+  ctx.fillRect(x+5,y+4,6,5);
+  ctx.fillStyle=P.player;
+  ctx.fillRect(x+5,y+2,6,4);
+  ctx.fillStyle='#1c1917';
+  ctx.fillRect(x+6,y+4,2,2);
+  ctx.fillRect(x+9,y+4,2,2);
+  ctx.fillStyle=P.rose;
+  ctx.fillRect(x+2,y+8,3,5);
+  ctx.fillRect(x+11,y+8,3,5);
+  ctx.fillStyle=P.player;
+  ctx.fillRect(x+7,y+6,1,1);
+  ctx.fillRect(x+9,y+6,1,1);
+}
+
+function drawSparkles(){
+  const t=tick*0.1;
+  const sps=[{c:3,r:3},{c:17,r:3},{c:3,r:17},{c:17,r:17},{c:10,r:10}];
+  for(const sp of sps){
+    if(maze[sp.r]&&maze[sp.r][sp.c]===0){
+      const x=sp.c*CELL+8,y=sp.r*CELL+8;
+      const a=0.4+0.5*Math.abs(Math.sin(t+sp.c));
+      ctx.fillStyle=`rgba(253,230,138,${a})`;
+      ctx.fillRect(x,y-3,2,2);
+      ctx.fillRect(x-3,y,2,2);
+      ctx.fillRect(x+3,y,2,2);
+      ctx.fillRect(x,y+3,2,2);
+    }
+  }
+}
+
+function draw(){
+  ctx.fillStyle=P.bg;
+  ctx.fillRect(0,0,C.width,C.height);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)drawCell(r,c);
+  if(!rosesPlaced){placeRoses();rosesPlaced=true;}
+  for(const rs of roses)drawRose(rs.r,rs.c);
+  drawSparkles();
+  drawExit();
+  drawPlayer();
+}
+
+function loop(){
+  tick++;blink++;
+  draw();
+  if(!won&&!gameOver)window._raf=requestAnimationFrame(loop);
+  else draw();
+}
+
+document.addEventListener('keydown',e=>{
+  const m={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1],
+            KeyW:[-1,0],KeyS:[1,0],KeyA:[0,-1],KeyD:[0,1]};
+  if(m[e.code]){e.preventDefault();move(...m[e.code]);}
+});
+
+startGame();
+rosesPlaced=false;
+</script>
