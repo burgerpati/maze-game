@@ -2,10 +2,26 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;image-rendering:pixelated}
-#app{font-family:'Press Start 2P',monospace;background:#1a0a2e;padding:12px;color:#fff}
+html,body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    background:#1a0a2e;
+}
 
+#app{
+    font-family:'Press Start 2P',monospace;
+    background:#1a0a2e;
+    padding:12px;
+    color:#fff;
+    min-height:100vh;
+}
 #screen-maze{display:block}
-#screen-win{display:none;text-align:center;padding:2rem 1rem}
+#screen-win{
+  display:none;
+  text-align:center;
+  padding:4rem 1rem;
+}
 #screen-player{display:none;padding:8px 0}
 
 .mz-head{text-align:center;margin-bottom:10px}
@@ -14,7 +30,12 @@
 .stats-row{display:flex;justify-content:center;gap:16px;margin-bottom:8px;font-size:6px;color:#aa88ff}
 .stats-row span{color:#ffdd00}
 #msg-bar{text-align:center;font-size:6px;min-height:18px;margin-bottom:6px;color:#ffdd00;line-height:2;text-shadow:1px 1px #ff4400}
-#cw{display:flex;justify-content:center;margin-bottom:10px}
+#cw{
+  display:flex;
+  justify-content:center;
+  margin-bottom:10px;
+  overflow:auto;
+}
 canvas{display:block;border:3px solid #ff69b4;outline:3px solid #7700aa}
 .brow{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .brow button{font-family:'Press Start 2P',monospace;font-size:6px;padding:6px 10px;background:#2d0a4e;color:#ff69b4;border:2px solid #ff69b4;cursor:pointer;text-transform:uppercase;letter-spacing:1px}
@@ -27,13 +48,28 @@ canvas{display:block;border:3px solid #ff69b4;outline:3px solid #7700aa}
 .db:active{transform:translate(2px,2px);background:#aa88ff;color:#1a0a2e}
 @media(max-width:500px){#dpad{display:flex}}
 
-#wh{font-size:28px;margin-bottom:12px;letter-spacing:8px;animation:blink 0.6s step-end infinite}
+#wh{font-size:40px;margin-bottom:12px;letter-spacing:8px;animation:blink 0.6s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-#wt{font-size:9px;color:#ffdd00;text-shadow:2px 2px #ff4400;margin-bottom:8px;line-height:1.8}
+#wt{font-size:12px;color:#ffdd00;text-shadow:2px 2px #ff4400;margin-bottom:8px;line-height:1.8}
 #ws{font-size:6px;color:#aa88ff;margin-bottom:20px;line-height:2}
-.ub{border:3px solid #1DB954;outline:3px solid #158a3e;background:#0d2e1a;padding:16px 20px;max-width:380px;margin:0 auto 20px}
-.ub p{font-size:6px;margin-bottom:14px;color:#1DB954;line-height:2.2}
-#btn-open{font-family:'Press Start 2P',monospace;font-size:7px;padding:10px 16px;background:#1DB954;color:#000;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:1px;display:block;margin:0 auto}
+.ub{
+  border:3px solid #1DB954;
+  outline:3px solid #158a3e;
+  background:#0d2e1a;
+
+  width:500px;
+  height:500px;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+
+  margin:0 auto 20px;
+}
+.ub p{font-size:12px;margin-bottom:14px;color:#1DB954;line-height:2.2}
+#btn-open{font-family:'Press Start 2P',monospace;font-size:14px;padding:10px 16px;background:#1DB954;color:#000;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:1px;display:block;margin:0 auto}
 #btn-open:hover{background:#1ed760;color:#000}
 #btn-open:active{transform:translate(2px,2px)}
 
@@ -138,7 +174,7 @@ canvas{display:block;border:3px solid #ff69b4;outline:3px solid #7700aa}
 </div>
 
 <script>
-const CELL=28,COLS=13,ROWS=13;
+const CELL=40,COLS=13,ROWS=13; 
 const W=COLS*CELL,HC=ROWS*CELL;
 const canvas=document.getElementById('mc');
 canvas.width=W;canvas.height=HC;

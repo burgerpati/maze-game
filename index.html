@@ -3,80 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Love Maze Game</title>
+    <title>Love Maze Spotify</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="love-root">
-  <h2 class="sr-only">Love-themed pixel art maze game. Navigate the heart character through the maze using arrow keys to reach the gift reward at the end.</h2>
+<div id="app">
 
-  <div id="hud">
-    <span class="hl">LEVEL</span><span class="hv" id="hl">1</span>
-    <span class="hl">STEPS</span><span class="hv" id="hs">0</span>
-    <span class="hl">HEARTS</span><span class="hv" id="hh">♥♥♥</span>
-    <span class="hl">SCORE</span><span class="hv" id="hsc">0</span>
-  </div>
+    <!-- MAZE SCREEN -->
+    <div id="screen-maze">
+        <div class="mz-head">
+            <h2 id="mzt">♥ LOVE MAZE — LEVEL 1 / 2</h2>
+            <p id="mzd">GUIDE THE HEART. ARROW KEYS / WASD</p>
+        </div>
 
-  <div id="cv-wrap">
-    <canvas id="gc" width="336" height="336"></canvas>
-  </div>
+        <div class="stats-row">
+            <div>MOVES: <span id="moves">0</span></div>
+            <div>LVL: <span id="lvld">1</span>/2</div>
+        </div>
 
-  <div id="msg">
-    USE ARROW KEYS TO MOVE<br>
-    FIND YOUR WAY TO THE GIFT! ♥
-  </div>
+        <div id="msg-bar"></div>
 
-  <div id="btns">
-    <button class="lb" onclick="startGame()">♥ NEW GAME</button>
-    <button class="lb" onclick="skipLevel()">SKIP ♥</button>
-  </div>
+        <div id="cw">
+            <canvas id="mc"></canvas>
+        </div>
 
-  <div id="reward-screen">
-    <div id="confetti-wrap"></div>
+        <div id="dpad">
+            <div class="dg">
+                <div></div>
+                <button class="db" data-d="up">▲</button>
+                <div></div>
 
-    <div id="reward-title">YOU FOUND LOVE! ♥</div>
+                <button class="db" data-d="left">◀</button>
+                <div></div>
+                <button class="db" data-d="right">▶</button>
 
-    <svg id="heart-art" viewBox="0 0 80 70" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="hglow">
-          <feGaussianBlur stdDeviation="2" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
+                <div></div>
+                <button class="db" data-d="down">▼</button>
+                <div></div>
+            </div>
+        </div>
 
-      <path d="M40 60 C10 40 4 20 16 12 C24 6 34 10 40 18 C46 10 56 6 64 12 C76 20 70 40 40 60Z"
-            fill="#e879a0" filter="url(#hglow)"/>
+        <div class="brow">
+            <button id="btn-rst">RESTART</button>
+            <button id="btn-hint">HINT</button>
+        </div>
+    </div>
 
-      <path d="M40 54 C16 36 10 20 20 14 C26 10 34 14 40 22 C46 14 54 10 60 14 C70 20 64 36 40 54Z"
-            fill="#f9a8d4"/>
+    <!-- WIN SCREEN -->
+    <div id="screen-win">
+        <div id="wh">♥♥♥</div>
+        <div id="wt">LOVE FOUND!</div>
+        <div id="ws">
+            BOTH MAZES CLEARED.<br>
+            CUPID UNLOCKED A GIFT...
+        </div>
 
-      <path d="M28 22 C26 18 30 15 34 20"
-            stroke="#fff"
-            stroke-width="2"
-            fill="none"
-            stroke-linecap="round"
-            opacity="0.6"/>
+        <div class="ub">
+            <p>
+                ★ CUPID'S SPOTIFY PLAYLIST<br>
+                IS NOW UNLOCKED!<br><br>
+                SONGS THAT REMIND HIM OF YOU.
+            </p>
 
-      <text x="40" y="36" text-anchor="middle" font-size="14" fill="#fff">
-        ♥
-      </text>
+            <button id="btn-open">
+                ▶ OPEN PLAYLIST
+            </button>
+        </div>
+    </div>
 
-      <circle cx="16" cy="8" r="3" fill="#fde68a" opacity="0.9"/>
-      <circle cx="64" cy="8" r="2" fill="#fde68a" opacity="0.7"/>
-      <circle cx="8" cy="30" r="2" fill="#f9a8d4" opacity="0.8"/>
-      <circle cx="72" cy="30" r="2" fill="#f9a8d4" opacity="0.8"/>
-    </svg>
+    <!-- PLAYER SCREEN -->
+    <div id="screen-player">
 
-    <div id="reward-msg"></div>
+        <button id="back2">◄ BACK</button>
 
-    <button class="lb" onclick="nextLevelFromReward()">
-      NEXT LEVEL ♥
-    </button>
-  </div>
+        <div class="pl-wrap">
+
+            <div class="pl-header">
+                <div class="sp-logo">
+                    <span class="sp-dot"></span>
+                    <span class="sp-dot" style="width:8px;height:8px"></span>
+                    <span class="sp-dot" style="width:6px;height:6px"></span>
+                </div>
+
+                <div>
+                    <div class="pl-header-title">
+                        CUPID'S PLAYLIST
+                    </div>
+
+                    <div class="pl-header-sub">
+                        SONGS THAT REMIND ME OF YOU ♥
+                    </div>
+                </div>
+            </div>
+
+            <div class="embed-wrap px-overlay">
+                <iframe
+                    id="sp-embed"
+                    src="https://open.spotify.com/embed/playlist/7KGLOl9cUGlaDKArLAe65Z?utm_source=generator&theme=0"
+                    width="100%"
+                    height="480"
+                    frameborder="0"
+                    allowfullscreen=""
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy">
+                </iframe>
+            </div>
+
+            <div class="px-label">
+                ★ STREAMING VIA SPOTIFY ★
+            </div>
+
+            <div class="open-sp-row">
+                <a
+                    href="https://open.spotify.com/playlist/7KGLOl9cUGlaDKArLAe65Z?si=4b1220457cbc497a"
+                    target="_blank"
+                    class="sp-btn">
+                    ⬡ OPEN IN SPOTIFY
+                </a>
+
+                <button
+                    class="sp-btn sp-btn-ghost"
+                    onclick="document.getElementById('back2').click()">
+                    ◄ BACK TO MAZE
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
 <script src="script.js"></script>
